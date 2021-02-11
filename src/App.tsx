@@ -1,26 +1,48 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { IMonsters } from './@types/types';
+import { StyledApp, StyledHTag, StyledInput } from './assets/appStyles';
+import CardList from './components/cardList/CardList';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+const App: React.FC = () => {
+  const [monsters, setMonsters] = useState<[IMonsters]>([
+    { id: 0, name: '', email: '' },
+  ]);
+
+  const [searchField, setSearchField] = useState<string>('');
+
+  useEffect(() => {
+    const getMonsters = async () => {
+      const response = await fetch(
+        'https://jsonplaceholder.typicode.com/users'
+      );
+      const data = await response.json();
+      setMonsters(data);
+    };
+
+    getMonsters();
+    return () => {
+      setMonsters([{ id: 0, name: '', email: '' }]);
+    };
+  }, []);
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchField(e.target.value);
+  };
+
+  const filteredMonsters = monsters.filter((monster) =>
+    monster.name.toLowerCase().includes(searchField.toLowerCase())
   );
-}
+  return (
+    <StyledApp>
+      <StyledHTag>Monsters Rolodex</StyledHTag>
+      <StyledInput
+        type='search'
+        placeholder='Search Monsters'
+        onChange={onChange}
+      />
+      <CardList monsters={filteredMonsters} />
+    </StyledApp>
+  );
+};
 
 export default App;
